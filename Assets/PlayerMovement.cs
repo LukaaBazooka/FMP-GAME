@@ -51,10 +51,10 @@ public class PlayerMovement : MonoBehaviour
     private RaycastHit slopeHit;
     private bool exitingSlope;
 
-
+    
    
 
-public Transform orientation;
+    public Transform orientation;
 
     float horizontalInput;
     float verticalInput;
@@ -75,7 +75,42 @@ public Transform orientation;
 
     public bool sliding;
 
+    private int HowLongFalling = 0;
+    
+    private IEnumerator HowLong()
+    {
+        if (state== MovementState.air)
+        {
+            while (state == MovementState.air)
+            {
+                yield return new WaitForSeconds(1);
+                HowLongFalling++;
+                
+            }
+            if (HowLongFalling >= 0.5 && HowLongFalling < 2 && state != MovementState.air) 
+            {
+                HowLongFalling = 0;
+                animator.SetBool("ShortLand", true);
+                animator.SetBool("Roll", false);
+                Debug.Log(HowLongFalling);
 
+            }
+            else if (HowLongFalling >= 0.5 && HowLongFalling < 2 && state != MovementState.air)
+            {
+                HowLongFalling = 0;
+                animator.SetBool("ShortLand", false);
+                animator.SetBool("Roll", true);
+                Debug.Log(HowLongFalling);
+
+
+            }
+            else
+            {
+               // Debug.Log(HowLongFalling);
+            }
+        }
+
+    }
 
 
     //animation
@@ -99,7 +134,7 @@ public Transform orientation;
             {
                 animator.SetFloat("Speed", 0);
                 animator.SetBool("Crouching", true);
-                Debug.Log("They are now crouching");
+     
 
             }
             else
@@ -121,16 +156,14 @@ public Transform orientation;
         {
             animator.SetFloat("Speed", 0.06f);
             animator.SetBool("Crouching", true);
-            Debug.Log("They are now crouch walking");
-
+      
         }
         else if (state == MovementState.sprinting)
         {
             animator.SetFloat("Speed", 1);
             animator.SetBool("Crouching", false);
         }
-        Debug.Log(animator.GetFloat("Speed"));
-        Debug.Log(animator.GetBool("Crouching"));
+    
 
         // ground check
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
@@ -141,9 +174,18 @@ public Transform orientation;
 
         // handle drag
         if (grounded)
+        {
             rb.drag = groundDrag;
+            animator.SetBool("InAir", false);
+        }
+    
         else
+        {
             rb.drag = 0;
+            animator.SetBool("InAir", true);
+
+
+        }
     }
 
     
@@ -153,6 +195,23 @@ public Transform orientation;
         MovePlayer();
     }
 
+    private IEnumerator jumpcourtine()
+    {
+        if (state == MovementState.sprinting || state == MovementState.walking && state == MovementState.crouching && moveDirection != Vector3.zero)
+        {
+            animator.Play("Jump2");
+            Jump();
+
+        }
+        else
+        {
+            animator.Play("Jump1");
+            yield return new WaitForSeconds(0.5f);
+            Jump();
+
+
+        }
+    }
     private void MyInput()
     {
         horizontalInput = Input.GetAxisRaw("Horizontal");
@@ -162,8 +221,9 @@ public Transform orientation;
         if (Input.GetKey(jumpKey) && readyToJump && grounded)
         {
             readyToJump = false;
+      
+            StartCoroutine(jumpcourtine());
 
-            Jump();
 
             Invoke(nameof(ResetJump), jumpCooldown);
         }
@@ -181,6 +241,7 @@ public Transform orientation;
         if (sliding)
         {
             state = MovementState.sliding;
+            animator.SetBool("InAir", false);
 
             if (OnSlope() && rb.velocity.y < 0.1f)
                 desiredMoveSpeed = slideSpeed;
@@ -194,6 +255,8 @@ public Transform orientation;
         {
             state = MovementState.crouching;
             desiredMoveSpeed = crouchSpeed;
+            animator.SetBool("InAir", false);
+
         }
 
         // Mode - Sprinting
@@ -201,6 +264,8 @@ public Transform orientation;
         {
             state = MovementState.sprinting;
             desiredMoveSpeed = sprintSpeed;
+            animator.SetBool("InAir", false);
+
         }
 
         // Mode - Walking
@@ -208,12 +273,18 @@ public Transform orientation;
         {
             state = MovementState.walking;
             desiredMoveSpeed = walkSpeed;
+            animator.SetBool("InAir", false);
+
         }
 
         // Mode - Air
         else
         {
             state = MovementState.air;
+           // Debug.Log(animator.GetBool("InAir"));
+            animator.SetBool("InAir", true);
+            StartCoroutine(HowLong());
+
         }
 
         // check if desiredMoveSpeed has changed drastically
@@ -312,10 +383,8 @@ public Transform orientation;
 
         // reset y velocity
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-        animator.SetBool("IsJump", true);
 
-        rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
-        animator.SetBool("IsJump", false);
+        rb.AddForce(transform.up * jumpForce * 1.1f, ForceMode.Impulse);
 
     }
     private void ResetJump()
