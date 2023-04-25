@@ -51,8 +51,6 @@ public class PlayerMovement : MonoBehaviour
     private RaycastHit slopeHit;
     private bool exitingSlope;
 
-    
-   
 
     public Transform orientation;
 
@@ -62,6 +60,8 @@ public class PlayerMovement : MonoBehaviour
     Vector3 moveDirection;
 
     Rigidbody rb;
+
+
 
     public MovementState state;
     public enum MovementState
@@ -242,6 +242,7 @@ public class PlayerMovement : MonoBehaviour
         {
             state = MovementState.sliding;
             animator.SetBool("InAir", false);
+            animator.SetBool("IsSliding", true);
 
             if (OnSlope() && rb.velocity.y < 0.1f)
                 desiredMoveSpeed = slideSpeed;
