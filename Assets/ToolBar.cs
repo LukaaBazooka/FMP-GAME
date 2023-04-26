@@ -25,7 +25,7 @@ public class ToolBar : MonoBehaviour
 
     // Update is called once per frame
 
-    private void Start()
+    public void Start()
     {
         LeanTween.init(1000);
     }
