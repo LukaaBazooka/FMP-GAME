@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -16,6 +17,7 @@ public class PlayerMovement : MonoBehaviour
     public float walkSpeed;
     public float sprintSpeed;
     public float slideSpeed;
+    public float swingSpeed;
 
     private float desiredMoveSpeed;
     private float lastDesiredMoveSpeed;
@@ -57,19 +59,28 @@ public class PlayerMovement : MonoBehaviour
     float horizontalInput;
     float verticalInput;
 
+
+    [Header("Camera Effects")]
+    public float grappleFov = 95f;
+
     Vector3 moveDirection;
 
     Rigidbody rb;
 
+    public bool activeGrapple;
+    public bool swinging;
+    public bool freeze;
 
 
     public MovementState state;
     public enum MovementState
     {
+        freeze,
+        grappling,
+        swinging,
         walking,
         sprinting,
         crouching,
-        sliding,
         air
     }
 
@@ -173,7 +184,7 @@ public class PlayerMovement : MonoBehaviour
         StateHandler();
 
         // handle drag
-        if (grounded)
+        if (grounded && !activeGrapple)
         {
             rb.drag = groundDrag;
             animator.SetBool("InAir", false);
@@ -238,19 +249,18 @@ public class PlayerMovement : MonoBehaviour
     private void StateHandler()
     {
         // Mode - Sliding
-        if (sliding)
+
+        if (freeze)
         {
-            state = MovementState.sliding;
-            animator.SetBool("InAir", false);
-            animator.SetBool("IsSliding", true);
-
-            if (OnSlope() && rb.velocity.y < 0.1f)
-                desiredMoveSpeed = slideSpeed;
-
-            else
-                desiredMoveSpeed = sprintSpeed;
+            state = MovementState.freeze;
+            moveSpeed = 0;
+            rb.velocity = Vector3.zero;
         }
-
+        else if (activeGrapple)
+        {
+            state = MovementState.grappling;
+            moveSpeed = sprintSpeed;
+        }
         // Mode - Crouching
         else if (Input.GetKey(crouchKey))
         {
@@ -331,6 +341,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void MovePlayer()
     {
+        if (activeGrapple) return;
+        if (swinging) return;
+
+
+
         // calculate movement direction
         moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
 
@@ -357,6 +372,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void SpeedControl()
     {
+        if (activeGrapple) return;
+
+
         // limiting speed on slope
         if (OnSlope() && !exitingSlope)
         {
@@ -395,6 +413,40 @@ public class PlayerMovement : MonoBehaviour
         exitingSlope = false;
     }
 
+    private bool enableMovementOnNextTouch;
+    public void JumpToPosition(Vector3 targetPosition, float trajectoryHeight)
+    {
+        activeGrapple = true;
+
+        velocityToSet = CalculateJumpVelocity(transform.position, targetPosition, trajectoryHeight);
+        Invoke(nameof(SetVelocity), 0.1f);
+
+        Invoke(nameof(ResetRestrictions), 3f);
+    }
+    private Vector3 velocityToSet;
+    private void SetVelocity()
+    {
+        enableMovementOnNextTouch = true;
+        rb.velocity = velocityToSet;
+
+ 
+    }
+
+    public void ResetRestrictions()
+    {
+        activeGrapple = false;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (enableMovementOnNextTouch)
+        {
+            enableMovementOnNextTouch = false;
+            ResetRestrictions();
+
+            GetComponent<Grappling>().StopGrapple();
+        }
+    }
     public bool OnSlope()
     {
         if (Physics.Raycast(transform.position, Vector3.down, out slopeHit, playerHeight * 0.5f + 0.3f))
@@ -410,4 +462,42 @@ public class PlayerMovement : MonoBehaviour
     {
         return Vector3.ProjectOnPlane(direction, slopeHit.normal).normalized;
     }
+
+    public Vector3 CalculateJumpVelocity(Vector3 startPoint, Vector3 endPoint, float trajectoryHeight)
+    {
+        float gravity = Physics.gravity.y;
+        float displacementY = endPoint.y - startPoint.y;
+        Vector3 displacementXZ = new Vector3(endPoint.x - startPoint.x, 0f, endPoint.z - startPoint.z);
+
+        Vector3 velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * trajectoryHeight);
+        Vector3 velocityXZ = displacementXZ / (Mathf.Sqrt(-2 * trajectoryHeight / gravity)
+            + Mathf.Sqrt(2 * (displacementY - trajectoryHeight) / gravity));
+
+        return velocityXZ + velocityY;
+    }
+
+    #region Text & Debugging
+
+    public TextMeshProUGUI text_speed;
+    public TextMeshProUGUI text_mode;
+    private void TextStuff()
+    {
+        Vector3 flatVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+
+        if (OnSlope())
+            text_speed.SetText("Speed: " + Round(rb.velocity.magnitude, 1) + " / " + Round(moveSpeed, 1));
+
+        else
+            text_speed.SetText("Speed: " + Round(flatVel.magnitude, 1) + " / " + Round(moveSpeed, 1));
+
+        text_mode.SetText(state.ToString());
+    }
+
+    public static float Round(float value, int digits)
+    {
+        float mult = Mathf.Pow(10.0f, (float)digits);
+        return Mathf.Round(value * mult) / mult;
+    }
+
+    #endregion
 }
