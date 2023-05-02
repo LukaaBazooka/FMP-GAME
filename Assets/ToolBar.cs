@@ -20,7 +20,7 @@ public class ToolBar : MonoBehaviour
     public GameObject Tool8;
     public GameObject Tool9;
 
-    public int key;
+    public static int key;
 
 
     // Update is called once per frame

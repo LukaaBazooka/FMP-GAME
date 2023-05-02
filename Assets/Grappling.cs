@@ -4,9 +4,12 @@ using UnityEngine;
 
 public class Grappling : MonoBehaviour
 {
+    public Animator animator;
+
+
     [Header("References")]
     private PlayerMovement pm;
-    public ToolBar toolbar;
+    public static ToolBar toolbar;
     
     public Transform cam;
     public Transform gunTip;
@@ -30,20 +33,21 @@ public class Grappling : MonoBehaviour
     private KeyCode grappleKey = KeyCode.Mouse0;
 
     private bool grappling;
-
+    public int Equipped;
     private void Start()
     {
         pm = GetComponent<PlayerMovement>();
-        toolbar = GetComponent<ToolBar>();
+       // toolbar = GetComponent<ToolBar>();
 
     }
 
-    private void Update()
+    public void Update()
     {
         // input
-        int key = toolbar.key;
+        Equipped = ToolBar.key;
+
         
-        if (Input.GetKeyDown(grappleKey) && key == 2) StartGrapple();
+        if (Input.GetKeyDown(grappleKey) && Equipped == 2) StartGrapple();
 
         if (grapplingCdTimer > 0)
             grapplingCdTimer -= Time.deltaTime;
@@ -58,6 +62,7 @@ public class Grappling : MonoBehaviour
     public void StartGrapple()
     {
         if (grapplingCdTimer > 0) return;
+
 
         grappling = true;
 
@@ -84,6 +89,8 @@ public class Grappling : MonoBehaviour
 
     public void ExcecuteGrapple()
     {
+        animator.Play("Grapple");
+
         pm.freeze = false;
 
         Vector3 lowestPoint = new Vector3(transform.position.x, transform.position.y - 1f, transform.position.z);
