@@ -9,8 +9,9 @@ public class Grappling : MonoBehaviour
 
     [Header("References")]
     private PlayerMovement pm;
+    private HealthChecker TagCheck;
+
     public static ToolBar toolbar;
-    
     public Transform cam;
     public Transform gunTip;
     public LayerMask whatIsGrappleable;
@@ -37,7 +38,8 @@ public class Grappling : MonoBehaviour
     private void Start()
     {
         pm = GetComponent<PlayerMovement>();
-       // toolbar = GetComponent<ToolBar>();
+
+        // toolbar = GetComponent<ToolBar>();
 
     }
 
@@ -90,6 +92,10 @@ public class Grappling : MonoBehaviour
     public void ExcecuteGrapple()
     {
         animator.Play("Grapple");
+
+        HealthChecker.Damage(10f);
+
+        //tComponent<HealthChecker>().Damage(10f);
 
         pm.freeze = false;
 
