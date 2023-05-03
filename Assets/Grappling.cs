@@ -17,7 +17,7 @@ public class Grappling : MonoBehaviour
     public LayerMask whatIsGrappleable;
     public LineRenderer lr;
 
-
+    public AudioSource GrappleSound;
 
     [Header("Grappling")]
     public float maxGrappleDistance = 25f;
@@ -31,7 +31,7 @@ public class Grappling : MonoBehaviour
     private float grapplingCdTimer;
 
     [Header("Input")]
-    private KeyCode grappleKey = KeyCode.Mouse0;
+    private KeyCode Mouse1Key = KeyCode.Mouse0;
 
     private bool grappling;
     public int Equipped;
@@ -49,7 +49,10 @@ public class Grappling : MonoBehaviour
         Equipped = ToolBar.key;
 
         
-        if (Input.GetKeyDown(grappleKey) && Equipped == 2) StartGrapple();
+        if (Input.GetKeyDown(Mouse1Key) && Equipped == 2) StartGrapple();
+        
+        //else if (Input.GetKeyDown(Mouse1Key) && Equipped == 1) HealthChecker.Damage(10f);
+
 
         if (grapplingCdTimer > 0)
             grapplingCdTimer -= Time.deltaTime;
@@ -93,7 +96,7 @@ public class Grappling : MonoBehaviour
     {
         animator.Play("Grapple");
 
-        HealthChecker.Damage(10f);
+        GrappleSound.Play();
 
         //tComponent<HealthChecker>().Damage(10f);
 
