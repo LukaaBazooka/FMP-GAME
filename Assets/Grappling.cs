@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class Grappling : MonoBehaviour
 {
@@ -33,7 +36,12 @@ public class Grappling : MonoBehaviour
     [Header("Input")]
     private KeyCode Mouse1Key = KeyCode.Mouse0;
 
-    private bool grappling;
+    public bool grappling;
+    public static bool grapplingtwo;
+
+    public bool ischargrappled;
+    public static  bool ischargrappled2;
+
     public int Equipped;
     private void Start()
     {
@@ -46,6 +54,8 @@ public class Grappling : MonoBehaviour
     public void Update()
     {
         // input
+        grapplingtwo = grappling;
+        ischargrappled2 = ischargrappled;
         Equipped = ToolBar.key;
 
         
@@ -64,6 +74,14 @@ public class Grappling : MonoBehaviour
             lr.SetPosition(0, gunTip.position);
     }
 
+    IEnumerator setpos(RaycastHit ray)
+    {
+        while (grappling)
+        {
+            grapplePoint = ray.rigidbody.position;
+            yield return new WaitForSeconds(0);
+        }
+    }
     public void StartGrapple()
     {
         if (grapplingCdTimer > 0) return;
@@ -76,10 +94,31 @@ public class Grappling : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(cam.position, cam.forward, out hit, maxGrappleDistance, whatIsGrappleable))
         {
-            grapplePoint = hit.point;
+            
+            if (hit.transform.tag == "NPC")
+            {
+                
+                StartCoroutine(setpos(hit));
+                ischargrappled= true;
+                Invoke(nameof(ExcecutePlayerGrapple), grappleDelayTime);
+                
+                hit.rigidbody.velocity = new Vector3(hit.rigidbody.velocity.x, 0f, hit.rigidbody.velocity.z);
 
-            Invoke(nameof(ExcecuteGrapple), grappleDelayTime);
+                hit.rigidbody.AddForce(transform.up * 15 * 1.1f, ForceMode.Impulse); ;
+                Debug.Log("Alive");
+            }
+            else
+            {
+                ischargrappled = false;
+                grapplePoint = hit.point;
+
+                Invoke(nameof(ExcecuteGrapple), grappleDelayTime);
+            }
+
+            
         }
+
+
 
         else
         {
@@ -90,6 +129,27 @@ public class Grappling : MonoBehaviour
 
         lr.enabled = true;
         lr.SetPosition(1, grapplePoint);
+    }
+    public void ExcecutePlayerGrapple()
+    {
+        animator.Play("Grapple");
+
+        GrappleSound.Play();
+
+        //tComponent<HealthChecker>().Damage(10f);
+
+        pm.freeze = false;
+
+        Vector3 lowestPoint = new Vector3(transform.position.x, transform.position.y - 1f, transform.position.z);
+
+        float grapplePointRelativeYPos = grapplePoint.y - lowestPoint.y;
+        float highestPointOfArc = grapplePointRelativeYPos + 10;
+
+        if (grapplePointRelativeYPos < 0) highestPointOfArc = 10;
+
+        pm.JumpToPosition(grapplePoint, highestPointOfArc);
+
+        Invoke(nameof(StopGrapple), 1f);
     }
 
     public void ExcecuteGrapple()

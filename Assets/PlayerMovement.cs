@@ -9,6 +9,7 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     [Header("anim")]
     public Animator animator;
+    public AudioSource Roll;
 
 
 
@@ -111,6 +112,7 @@ public class PlayerMovement : MonoBehaviour
                 HowLongFalling = 0;
                 animator.SetBool("ShortLand", false);
                 animator.SetBool("Roll", true);
+                Roll.Play();
                 Debug.Log(HowLongFalling);
 
 
