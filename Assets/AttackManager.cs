@@ -28,9 +28,13 @@ public class AttackManager : MonoBehaviour
     {
         Equipped = ToolBar.key;
 
-        if (Input.GetKeyDown(OnClick) && Equipped == 3 && ! action && ! owlcoodlwon)
+        if (Input.GetKeyDown(OnClick) && Equipped == 3 && ! action && ! owlcoodlwon && Grappling.grapplingtwo && Grappling.ischargrappled2)
         {
-            Attack();
+            Debug.Log("HEYEYEYE");
+            Slash.Play();
+
+            StartCoroutine(Attack());
+
         }
         
 
@@ -41,7 +45,6 @@ public class AttackManager : MonoBehaviour
         action = true;
         owlcoodlwon= true;
         animator.SetBool("Attacking", true);
-        Slash.Play();
 
         animator.Play("Owlslash");
         yield return new WaitForSeconds(1f);
