@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.49780262, g: 0.49780262, b: 0.49780262, a: 1}
+  m_IndirectSpecularColor: {r: 0.20837422, g: 0.20837422, b: 0.20837422, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -266,7 +266,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 51373424}
-  m_LocalRotation: {x: 0.08633172, y: 0.12125622, z: -0.0105867945, w: 0.9888032}
+  m_LocalRotation: {x: 0.08633174, y: 0.12125623, z: -0.010586799, w: 0.9888032}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3820,7 +3820,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: 192cd589fdea47143b3b7029268f122b, type: 3}
+  m_Texture: {fileID: 2800000, guid: e40a5fa920f21704a9d03b61a1ce4694, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -5512,7 +5512,7 @@ VisualEffect:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1958239638}
   m_Enabled: 1
-  m_Asset: {fileID: 8926484042661614526, guid: 84e3078197d16254b821d4d23b98854e, type: 3}
+  m_Asset: {fileID: 0}
   m_InitialEventName: OnPlay
   m_InitialEventNameOverriden: 0
   m_StartSeed: 0

@@ -119,7 +119,7 @@ public class HealthChecker : MonoBehaviour
         {
             CurrentHealth= 0;
         }
-        if (CurrentHealth - damage > MaxStaticHealth+10)
+        if (CurrentHealth - damage > MaxStaticHealth)
         {
             CurrentHealth= MaxStaticHealth;
         }

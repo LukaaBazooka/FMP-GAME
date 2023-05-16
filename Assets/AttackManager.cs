@@ -45,7 +45,7 @@ public class AttackManager : MonoBehaviour
             potionCD = true;
 
             HealthChecker.Damage(-10f);
-            StartCoroutine(Cooldown(2f));            
+            StartCoroutine(Cooldown(2f,"Potion"));            
         }
 
 
@@ -66,11 +66,13 @@ public class AttackManager : MonoBehaviour
         owlcoodlwon = false;
 
     }
-    IEnumerator Cooldown(float CD)
+    IEnumerator Cooldown(float CD,string type)
     {
-        yield return new WaitForSeconds(CD);
-        potionCD = false;
-        
-        
+        if (type == "Potion")
+        {
+            yield return new WaitForSeconds(CD);
+            potionCD = false;
+
+        }
     }
 }
