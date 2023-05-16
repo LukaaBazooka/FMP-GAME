@@ -61,7 +61,6 @@ public class Grappling : MonoBehaviour
         
         if (Input.GetKeyDown(Mouse1Key) && Equipped == 2) StartGrapple();
         
-        //else if (Input.GetKeyDown(Mouse1Key) && Equipped == 1) HealthChecker.Damage(10f);
 
 
         if (grapplingCdTimer > 0)

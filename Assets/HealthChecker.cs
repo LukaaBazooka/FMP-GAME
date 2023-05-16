@@ -114,7 +114,18 @@ public class HealthChecker : MonoBehaviour
     public static void Damage(float damage)
     {
         LeanTween.value(CurrentHealth, CurrentHealth -= damage, 2f).setEaseInOutQuad();
+
+        if (CurrentHealth - damage <=0)
+        {
+            CurrentHealth= 0;
+        }
+        if (CurrentHealth - damage > MaxStaticHealth+10)
+        {
+            CurrentHealth= MaxStaticHealth;
+        }
+
     }
+
     public static IEnumerator Regen()
     {
      

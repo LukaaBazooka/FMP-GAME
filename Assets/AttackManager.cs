@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using static PlayerMovement;
 
@@ -18,6 +19,7 @@ public class AttackManager : MonoBehaviour
     private bool owlcoodlwon;
     public AudioSource Slash;
 
+    private bool potionCD;
     void Start()
     {
         
@@ -30,13 +32,22 @@ public class AttackManager : MonoBehaviour
 
         if (Input.GetKeyDown(OnClick) && Equipped == 3 && ! action && ! owlcoodlwon && Grappling.grapplingtwo && Grappling.ischargrappled2)
         {
-            Debug.Log("HEYEYEYE");
+   
             Slash.Play();
 
             StartCoroutine(Attack());
 
         }
-        
+        else if (Input.GetKeyDown(OnClick) && Equipped == 1) HealthChecker.Damage(10f);
+
+        else if (Input.GetKeyDown(OnClick) && Equipped == 9 && potionCD == false)
+        {
+            potionCD = true;
+
+            HealthChecker.Damage(-10f);
+            StartCoroutine(Cooldown(2f));            
+        }
+
 
 
     }
@@ -54,5 +65,12 @@ public class AttackManager : MonoBehaviour
         yield return new WaitForSeconds(8);
         owlcoodlwon = false;
 
+    }
+    IEnumerator Cooldown(float CD)
+    {
+        yield return new WaitForSeconds(CD);
+        potionCD = false;
+        
+        
     }
 }
